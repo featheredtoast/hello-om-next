@@ -35,36 +35,31 @@
   (render [this]
           (let [{:keys [count id] :as props} (om/props this)]
             (dom/div nil
-                     (println props)
                      (dom/span nil (str "Count: " count " id: " id))
                      (dom/button
                       #js {:onClick
-                           (fn [e] (om/transact! this '[(counter/increment ~props)]))}
+                           (fn [e] (om/transact! this `[(counter/increment ~props) :counters]))}
                       "Click me!")))))
 (def counter-view (om/factory Counter {:keyfn :id}))
 
-(defui ListView
-  Object
-  (render [this]
-    (println "Render ListView" (-> this om/path first))
-    (let [list (om/props this)]
-      (apply dom/ul nil
-        (map counter-view list)))))
-(def list-view (om/factory ListView))
-
-(defui Thing
+(defui MyRoot
   static om/IQuery
   (query [this]
          (let [subquery (om/get-query Counter)]
-           `[{:counters ~subquery}]))
+           [{:counters subquery}]))
   Object
   (render [this]
           (println "root" (om/props this))
           (let [{:keys [counters]} (om/props this)]
-            (println counters)
-            (dom/div nil "hi")
             (dom/div nil
-                     (list-view counters)))))
+                     (str
+                      "total: "
+                      (->> counters
+                           (map :count)
+                           (reduce +)))
+                     (dom/div nil "hi")
+                     (dom/div nil
+                              (map counter-view counters))))))
 
 (def reconciler
   (om/reconciler
@@ -72,4 +67,4 @@
      :parser (om/parser {:read read :mutate mutate})}))
 
 (om/add-root! reconciler
-  Thing (gdom/getElement "app"))
+  MyRoot (gdom/getElement "app"))
