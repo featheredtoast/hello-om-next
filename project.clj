@@ -5,12 +5,17 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [[org.clojure/clojure "1.7.0"]
+                 [org.clojure/core.async "0.2.374"]
                  [org.clojure/clojurescript "1.7.189" :scope "provided"]
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.1.5"]
                  [bk/ring-gzip "0.1.1"]
                  [compojure "1.4.0"]
                  [org.omcljs/om "1.0.0-alpha28"]
+                 [cljsjs/react "0.14.3-0"]
+                 [cljsjs/react-dom "0.14.3-1"]
+                 [cljsjs/react-dom-server "0.14.3-0"]
+                 [sablono "0.5.3"]
                  [environ "1.0.1"]
                  [http-kit "2.1.19"]]
 
@@ -41,6 +46,7 @@
 
                 ;; You can configure a function to run every time figwheel reloads.
                 ;; :figwheel {:on-jsload "hello2.core/on-figwheel-reload"}
+                :figwheel true
 
                 :compiler {:main hello2.core
                            :asset-path "js/compiled/out"
