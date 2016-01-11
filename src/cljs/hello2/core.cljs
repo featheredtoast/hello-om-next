@@ -19,11 +19,10 @@
 
 (defmulti mutate om/dispatch)
 (defmethod mutate 'counter/increment
-  [{:keys [state]} _ params]
-  (println params)
+  [{:keys [state]} _ {:keys [id]}]
   {:action
    (fn []
-     (swap! state update-in [:count] inc))})
+     (swap! state update-in [:counter/by-id id :count] inc))})
 
 (defui Counter
   static om/Ident
@@ -44,18 +43,28 @@
                       "Click me!")))))
 (def counter-view (om/factory Counter {:keyfn :id}))
 
+(defui ListView
+  Object
+  (render [this]
+    (println "Render ListView" (-> this om/path first))
+    (let [list (om/props this)]
+      (apply dom/ul nil
+        (map counter-view list)))))
+(def list-view (om/factory ListView))
+
 (defui Thing
   static om/IQuery
   (query [this]
-         [{:counters (om/get-query Counter)}])
+         (let [subquery (om/get-query Counter)]
+           `[{:counters ~subquery}]))
   Object
   (render [this]
-          (println "root")
+          (println "root" (om/props this))
           (let [{:keys [counters]} (om/props this)]
             (println counters)
             (dom/div nil "hi")
             (dom/div nil
-                     (map counter-view counters)))))
+                     (list-view counters)))))
 
 (def reconciler
   (om/reconciler
