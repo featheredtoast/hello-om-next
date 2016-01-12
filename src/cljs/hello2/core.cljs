@@ -12,12 +12,15 @@
 (defn get-counters [state key]
   (let [st @state]
     (into [] (map #(get-in st %)) (get st key))))
+
 (defmulti read om/dispatch)
+
 (defmethod read :counters
   [{:keys [state] :as env} key params]
   {:value (get-counters state key)})
 
 (defmulti mutate om/dispatch)
+
 (defmethod mutate 'counter/increment
   [{:keys [state]} _ {:keys [id]}]
   {:action
@@ -38,7 +41,7 @@
                      (dom/span nil (str "Count: " count " id: " id))
                      (dom/button
                       #js {:onClick
-                           (fn [e] (om/transact! this `[(counter/increment ~props) :counters]))}
+                           (fn [e] (om/transact! this `[(counter/increment ~props) :count]))}
                       "Click me!")))))
 (def counter-view (om/factory Counter {:keyfn :id}))
 
