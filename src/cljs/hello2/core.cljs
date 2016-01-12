@@ -7,7 +7,12 @@
 
 (enable-console-print!)
 
-(def app-state {:counters [{:count 0 :id 0} {:count 1 :id 1}]})
+(def app-state (->> (range 0 1000)
+                    (map #(assoc {:count 1} :id %))
+                    vec
+                    (assoc {} :counters)))
+
+(println app-state)
 
 (defn get-counters [state key]
   (let [st @state]
@@ -37,13 +42,24 @@
   Object
   (render [this]
           (let [{:keys [count id] :as props} (om/props this)]
+            (println "rendering counter: " id)
             (dom/div nil
-                     (dom/span nil (str "Count: " count " id: " id))
+                     (dom/span nil (str "Id: " id " count: " count))
                      (dom/button
                       #js {:onClick
-                           (fn [e] (om/transact! this `[(counter/increment ~props) :count]))}
-                      "Click me!")))))
+                           (fn [e] (om/transact! this `[(counter/increment ~props)]))}
+                      "+")))))
 (def counter-view (om/factory Counter {:keyfn :id}))
+
+(defui Totals
+  Object
+  (render [this]
+          (println "rendering total")
+          (dom/div nil "total counters:"
+                   (->> (om/props this)
+                        (map :count)
+                        (reduce +)))))
+(def total-view (om/factory Totals))
 
 (defui MyRoot
   static om/IQuery
@@ -52,15 +68,10 @@
            [{:counters subquery}]))
   Object
   (render [this]
-          (println "root" (om/props this))
+          (println "rendering root" (om/props this))
           (let [{:keys [counters]} (om/props this)]
             (dom/div nil
-                     (str
-                      "total: "
-                      (->> counters
-                           (map :count)
-                           (reduce +)))
-                     (dom/div nil "hi")
+                     (total-view counters)
                      (dom/div nil
                               (map counter-view counters))))))
 
